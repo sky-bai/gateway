@@ -35,5 +35,7 @@ func (adminLogin *AdminController) AdminInfo(c *gin.Context) {
 		Introduction: "I am a super administrator",
 		Roles:        []string{"admin"},
 	}
+	middleware.ResponseSuccess(c, out)
+
 	return
 }
