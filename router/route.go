@@ -2,6 +2,7 @@ package router
 
 import (
 	"gateway/controller"
+	"gateway/golang_common/lib"
 	"gateway/middleware"
 	"github.com/gin-gonic/contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -35,4 +36,6 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 	{
 		controller.AdminRegister(adminRouter)
 	}
+
+	return router
 }

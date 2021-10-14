@@ -1,11 +1,15 @@
 package controller
 
 import (
+	"encoding/json"
+	"gateway/dao"
 	"gateway/dto"
-	"github.com/e421083458/go_gateway/dao"
-	"github.com/e421083458/go_gateway/golang_common/lib"
-	"github.com/e421083458/go_gateway/middleware"
+	"gateway/golang_common/lib"
+	"gateway/middleware"
+	"gateway/public"
+	"github.com/gin-gonic/contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"time"
 )
 
 type AdminLoginController struct{}
@@ -42,10 +46,43 @@ func (adminlogin *AdminLoginController) AdminLogin(c *gin.Context) {
 		return
 	}
 	admin := &dao.Admin{}
+	admin, err = admin.LoginCheck(c, tx, params)
+	if err != nil {
+		middleware.ResponseError(c, 2002, err)
+		return
+	}
+
+	//设置session
+	sessInfo := &dto.AdminSessionInfo{
+		ID:        admin.Id,
+		UserName:  admin.UserName,
+		LoginTime: time.Now(),
+	}
+	sessBts, err := json.Marshal(sessInfo)
+	if err != nil {
+		middleware.ResponseError(c, 2003, err)
+		return
+	}
+	sess := sessions.Default(c)
+	sess.Set(public.AdminSessionInfoKey, string(sessBts))
+	sess.Save()
 
 	out := &dto.AdminLoginOutput{Token: admin.UserName}
 	middleware.ResponseSuccess(c, out)
 }
 
+// AdminLogin godoc
+// @Summary 管理员退出
+// @Description 管理员退出
+// @Tags 管理员接口
+// @ID /admin_login/logout
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} middleware.Response{data=string} "success"
+// @Router /admin_login/logout [get]
 func (adminlogin *AdminLoginController) AdminLoginOut(c *gin.Context) {
+	sess := sessions.Default(c)
+	sess.Delete(public.AdminSessionInfoKey)
+	sess.Save()
+	middleware.ResponseSuccess(c, "")
 }

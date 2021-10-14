@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"gateway/dto"
+	"gateway/middleware"
 	"gateway/public"
 	"github.com/gin-gonic/contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -24,6 +25,7 @@ func (adminLogin *AdminController) AdminInfo(c *gin.Context) {
 	sessInfo := session.Get(public.AdminSessionInfoKey)
 	adminSessionInfo := dto.AdminSessionInfo{}
 	if err := json.Unmarshal([]byte(fmt.Sprint(sessInfo)), adminSessionInfo); err != nil {
+		middleware.ResponseError(c, 2000, err)
 		return
 	}
 	// 获取管理员信息的响应体
@@ -39,3 +41,5 @@ func (adminLogin *AdminController) AdminInfo(c *gin.Context) {
 
 	return
 }
+
+// 获取管理员信息
